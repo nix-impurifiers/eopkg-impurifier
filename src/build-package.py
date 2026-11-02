@@ -104,4 +104,8 @@ with tempfile.TemporaryDirectory(dir=".") as temporary:
     parsed.read()
     if parsed.metadata.package.name != spec["name"]:
         raise ValueError("native metadata round-trip failed")
+    expected_hashes = {entry.findtext("Path"): entry.findtext("Hash") for entry in files}
+    actual_hashes = {entry.path: entry.hash for entry in parsed.files.list}
+    if actual_hashes != expected_hashes:
+        raise ValueError("native file checksums did not round-trip")
     parsed.close()

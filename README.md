@@ -56,7 +56,7 @@ The emitter validates archives with upstream eopkg's reader. `nix flake check -L
 also boots QEMU and runs the actual pinned eopkg 5.0 client, with native version,
 distribution and architecture checks enabled. Coverage includes legacy-runtime
 rejection before unpack, dependency solving, offline recovery, flavor switches,
-protected config, batch activation, accounts/services/lifecycle/admin intent,
+protected and unedited config, batch activation, accounts/services/lifecycle/admin intent,
 driver refresh, foreign-root safety, removal and GC. The outer OS/init is NixOS;
 preinstalled providers are inventory markers, not installers. The fixture does
 not install usysconf and eopkg reports its normal missing-usysconf diagnostic;

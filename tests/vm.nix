@@ -150,6 +150,12 @@ pkgs.testers.runNixOSTest {
     with subtest("offline reinstall recovers with no network"):
         machine.succeed(install + "/tmp/packages/offline1.eopkg")
         machine.succeed("test $(/opt/nix/profile/bin/eopkg-tool) = 1")
+    with subtest("native checksums update unedited defaults"):
+        machine.succeed("grep version=1 /etc/eopkg-tool.conf")
+        machine.succeed(install + "/tmp/packages/offline2.eopkg")
+        machine.succeed("grep version=2 /etc/eopkg-tool.conf")
+        machine.succeed(install + "/tmp/packages/offline1.eopkg")
+        machine.succeed("grep version=1 /etc/eopkg-tool.conf")
     with subtest("native conffiles survive transport switches and upgrades"):
         machine.succeed("echo local > /etc/eopkg-tool.conf")
         machine.succeed(install + "/tmp/packages/net1.eopkg")
@@ -188,6 +194,7 @@ pkgs.testers.runNixOSTest {
         machine.succeed("systemctl enable --now eopkg-service.service")
         machine.succeed(remove + "eopkg-service")
         machine.fail("systemctl is-active --quiet eopkg-service.service")
+        machine.fail("test -e /etc/systemd/system/eopkg-service.service")
     with subtest("native driver transactions refresh snapshot bindings"):
         code, output = machine.execute(install + "/tmp/packages/hardware.eopkg 2>&1")
         assert code != 0 and "impurifier-host-driver" in output, output
