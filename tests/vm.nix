@@ -147,6 +147,10 @@ pkgs.testers.runNixOSTest {
         code, output = machine.execute(install + "/tmp/packages/net1.eopkg 2>&1")
         assert code != 0 and "nix-profile-engine:" in output, output
         assert machine.succeed("readlink /opt/nix/profile").strip() == before
+    with subtest("help remains read-only with unresolved native intent"):
+        output = machine.succeed(install + "--help")
+        assert "nix-profile-engine:" not in output, output
+        assert machine.succeed("readlink /opt/nix/profile").strip() == before
     with subtest("offline reinstall recovers with no network"):
         machine.succeed(install + "/tmp/packages/offline1.eopkg")
         machine.succeed("test $(/opt/nix/profile/bin/eopkg-tool) = 1")

@@ -15,8 +15,12 @@ def main():
     if any(arg in {"-D", "--destdir"} or arg.startswith("--destdir=")
            or (arg.startswith("-D") and len(arg) > 2) for arg in args):
         raise ValueError("foreign destdir cannot activate the host")
-    status = subprocess.run(["eopkg", aliases[sys.argv[1]], *args]).returncode
-    if any(arg in {"-n", "--dry-run", "-f", "--fetch-only"} for arg in args):
+    action = aliases[sys.argv[1]]
+    status = subprocess.run(["eopkg", action, *args]).returncode
+    readonly = {"-n", "--dry-run", "-h", "--help", "--version"}
+    if action in {"install", "upgrade"}:
+        readonly.update({"-f", "--fetch-only"})
+    if any(arg in readonly for arg in args):
         return status
     engine = Path("/usr/sbin/nix-profile-engine")
     activation = subprocess.run([str(engine), "reconcile"]).returncode if engine.exists() else 0
