@@ -61,3 +61,20 @@ driver refresh, foreign-root safety, removal and GC. The outer OS/init is NixOS;
 preinstalled providers are inventory markers, not installers. The fixture does
 not install usysconf and eopkg reports its normal missing-usysconf diagnostic;
 full Solus/usysconf integration remains separate coverage.
+
+## Native payloads and bundled Nix
+
+`makeNativePackage { name; version; payload; dependencies?; configPaths?; ... }`
+accepts a producer-prepared filesystem tree. It adds no engine intent or Nix
+dependency; ordinary `eopkg` owns and installs its files. Distribution metadata
+and native dependency expressions remain consumer policy. The producer supplies
+a working target layout; this does not relocate binaries. A native VM executes
+a static payload in a target root without `/nix`, upgrades and removes it.
+
+`makeRuntimePackage` accepts `bundledNixStore` and `bundledNixNotices` for a static
+ELF client and its upstream notices. Bundling omits the default Nix dependency;
+Python and the manager's Python API remain required. Compatible external clients
+take precedence, explicit `IMPURIFIER_NIX_STORE` disables fallback, and failed
+mutations are never retried through another client. A bundled-client VM repeats
+the original lifecycle suite with an incompatible external candidate. The Nix
+provider/installer remains deferred.

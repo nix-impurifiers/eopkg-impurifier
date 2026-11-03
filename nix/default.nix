@@ -145,7 +145,9 @@ let
     };
   makeRuntimePackage =
     {
-      nixDependency ? "nix",
+      bundledNixStore ? null,
+      bundledNixNotices ? [ ],
+      nixDependency ? (if bundledNixStore == null then "nix" else null),
       pythonDependency ? "python3",
       eopkgDependency ? "python-eopkg",
       distribution ? "Solus",
@@ -156,14 +158,13 @@ let
       version = core.runtimeVersion;
       license = "MIT";
       inherit distribution distributionRelease;
-      dependencies = [
-        nixDependency
+      dependencies = lib.optional (nixDependency != null) nixDependency ++ [
         pythonDependency
         eopkgDependency
       ];
       payload = pkgs.runCommand "eopkg-impurifier-runtime-payload" { } ''
         mkdir -p $out
-        cp -r ${core.makeRuntimeTree { }}/. $out/
+        cp -r ${core.makeRuntimeTree { inherit bundledNixStore bundledNixNotices; }}/. $out/
         chmod -R u+w $out
         install -Dm755 ${../src/adapter.py} $out/usr/sbin/eopkg-impurifier
       '';
@@ -183,6 +184,7 @@ in
     makeRuntimePackage
     ;
   nativeEopkg = tools.package;
+  makeNativePackage = args: buildPackage args;
   runtimePackage = makeRuntimePackage { };
   makeNetPackage = args: makePackage (args // { offline = false; });
   makeOfflinePackage = args: makePackage (args // { offline = true; });
